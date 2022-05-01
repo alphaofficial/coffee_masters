@@ -35,6 +35,7 @@ class Offer extends StatelessWidget {
           child: Container(
             decoration: const BoxDecoration(
               image: DecorationImage(
+                fit: BoxFit.cover,
                 image: AssetImage("images/background.png"),
               ),
             ),
