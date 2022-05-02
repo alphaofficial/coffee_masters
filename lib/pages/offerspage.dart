@@ -1,3 +1,4 @@
+import 'package:coffee_masters/datamanager.dart';
 import 'package:flutter/material.dart';
 
 class OffersPage extends StatelessWidget {
