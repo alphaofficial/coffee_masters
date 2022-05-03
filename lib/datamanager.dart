@@ -14,9 +14,9 @@ class DataManager {
         item.quantity += 1;
         found = true;
       }
-      if (!found) {
-        cart.add(ItemInCart(product: p, quantity: 1));
-      }
+    }
+    if (!found) {
+      cart.add(ItemInCart(product: p, quantity: 1));
     }
   }
 

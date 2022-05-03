@@ -4,86 +4,75 @@ import 'package:flutter/material.dart';
 
 class MenuPage extends StatelessWidget {
   final DataManager dataManager;
+
   const MenuPage({Key? key, required this.dataManager}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    // var p = Product(
-    //   id: 1,
-    //   name: "Coffee",
-    //   price: 1.99,
-    //   image: "",
-    // );
+    var screenSize = MediaQuery.of(context).size;
 
-    // var q = Product(
-    //   id: 2,
-    //   name: "Dummy Item",
-    //   price: 5.99,
-    //   image: "",
-    // );
-
-    // return ListView(
-    //   children: [
-    //     ProductItem(
-    //       product: p,
-    //       onAdd: () {},
-    //     ),
-    //     ProductItem(
-    //       product: q,
-    //       onAdd: () {},
-    //     ),
-    //     ProductItem(
-    //       product: p,
-    //       onAdd: () {},
-    //     ),
-    //   ],
-    // );
-
-    return FutureBuilder(
-      future: dataManager.getMenu(),
-      builder: ((context, snapshot) {
-        if (snapshot.hasData) {
-          //future has finished and data is ready
-          var categories = snapshot.data as List<Category>;
-          return ListView.builder(
-            itemCount: categories.length,
-            itemBuilder: ((context, index) {
-              return Column(
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Text(
-                        categories[index].name,
-                        style: const TextStyle(fontSize: 28),
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: FutureBuilder<List<Category>>(
+        future: dataManager.getMenu(),
+        builder: (context, snapshot) {
+          if (snapshot.hasData) {
+            return ListView.builder(
+                itemCount: snapshot.data!.length,
+                itemBuilder: (context, index) {
+                  // EACH CATEGORY STARTS HERE
+                  var category = snapshot.data![index];
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.only(
+                            top: 32.0, bottom: 8.0, left: 8.0),
+                        child: Text(
+                          category.name,
+                          style: TextStyle(color: Colors.brown.shade400),
+                        ),
                       ),
-                    ),
-                  ),
-                  ListView.builder(
-                    shrinkWrap: true,
-                    physics: const ClampingScrollPhysics(),
-                    itemCount: categories[index].products.length,
-                    itemBuilder: ((context, productIndex) {
-                      return ProductItem(
-                        product: categories[index].products[productIndex],
-                        onAdd: () {},
-                      );
-                    }),
-                  )
-                ],
-              );
-            }),
-          );
-        } else {
-          if (snapshot.hasError) {
-            //data not there
-            return Text("Error: ${snapshot.error}");
+                      if (screenSize.width < 500)
+                        // EACH MENU ITEM, Mobile Viewport
+                        ListView.builder(
+                          shrinkWrap: true,
+                          physics: ClampingScrollPhysics(),
+                          itemCount: category.products.length,
+                          itemBuilder: (context, index) {
+                            return ProductItem(
+                              product: category.products[index],
+                              onAdd: (p) => dataManager.cartAdd(p),
+                            );
+                          },
+                        )
+                      else
+                        // EACH MENU ITEM, Large Viewport
+                        Center(
+                          child: Wrap(
+                            alignment: WrapAlignment.spaceAround,
+                            children: [
+                              for (var product in category.products)
+                                SizedBox(
+                                  width: 350,
+                                  child: ProductItem(
+                                    product: product,
+                                    onAdd: (p) => dataManager.cartAdd(p),
+                                  ),
+                                )
+                            ],
+                          ),
+                        )
+                    ],
+                  );
+                });
+          } else if (snapshot.hasError) {
+            return Text('${snapshot.error}');
           }
-          //data in progress
+          // By default, show a loading spinner.
           return const CircularProgressIndicator();
-        }
-      }),
+        },
+      ),
     );
   }
 }
@@ -129,7 +118,9 @@ class ProductItem extends StatelessWidget {
                 Padding(
                   padding: const EdgeInsets.only(right: 16.0),
                   child: ElevatedButton(
-                    onPressed: () {},
+                    onPressed: () {
+                      onAdd(product);
+                    },
                     child: const Text("Add"),
                   ),
                 )
